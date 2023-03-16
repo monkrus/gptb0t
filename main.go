@@ -10,7 +10,7 @@ import (
 
 func main() {
 	// Set up OpenAI API credentials
-	apiKey := "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"
+	apiKey := "YOUR API KEY HERE"
 	client := openai.NewClient(apiKey)
 
 	// Define the chatbot prompt
