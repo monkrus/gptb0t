@@ -10,7 +10,7 @@ import (
 
 func main() {
 	// Set up OpenAI API credentials
-	apiKey := "YOUR API KEY HERE"
+	apiKey := "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"
 	client := openai.NewClient(apiKey)
 
 	// Define the chatbot prompt
@@ -37,10 +37,11 @@ Chatbot:`
 		}
 
 		// Call the OpenAI API to generate a response
-		response, err := client.Completions(context.Background(), &openai.CompletionRequest{
-			Prompt:    fmt.Sprintf(prompt, conversationHistory, userInput),
-			MaxTokens: 100,
-			Model:     "davinci",
+		response, err := client.CreateCompletion(context.Background(), openai.CompletionRequest{
+			Prompt:      fmt.Sprintf(prompt, conversationHistory, userInput),
+			MaxTokens:   100,
+			Model:       openai.GPT3TextDavinci003,
+			Temperature: 0.9,
 		})
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
