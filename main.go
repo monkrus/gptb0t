@@ -22,9 +22,14 @@ func main() {
 	response, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
-			Prompt:    input,
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role:    "user",
+					Content: input,
+				},
+			},
 			Model:     openai.GPT3Dot5Turbo,
-			MaxTokens: 100,
+			MaxTokens: 1000,
 		},
 	)
 	if err != nil {
@@ -33,5 +38,13 @@ func main() {
 	}
 
 	// Print the response from ChatGPT
-	fmt.Printf("ChatGPT: %v\n", response.Choices[0].Message.Content)
+	var generatedText string
+	if len(response.Choices) > 0 {
+		if response.Choices[0].Message.Content != "" {
+			generatedText = response.Choices[0].Message.Content
+		} else {
+			generatedText = response.Choices[0].Message.Content
+		}
+	}
+	fmt.Printf("ChatGPT: %v\n", generatedText)
 }
