@@ -5,46 +5,58 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/sashabaranov/go-openai"
+	openai "github.com/sashabaranov/go-openai"
 )
 
 func main() {
 	// Set up OpenAI API credentials
-	apiKey := "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"
+	apiKey := "YOUR API KEY HERE"
 	client := openai.NewClient(apiKey)
 
-	// Prompt the user for input
-	var input string
-	fmt.Print("You: ")
-	fmt.Scanln(&input)
+	// Define the chatbot prompt
+	prompt := `
+As an advanced chatbot, your primary goal is to assist users to the best of your ability. This may involve answering questions, providing helpful information, or completing tasks based on user input. In order to effectively assist users, it is important to be detailed and thorough in your responses. Use examples and evidence to support your points and justify your recommendations or solutions.
 
-	// Call the OpenAI API to generate a response
-	response, err := client.CreateChatCompletion(
-		context.Background(),
-		openai.ChatCompletionRequest{
-			Messages: []openai.ChatCompletionMessage{
-				{
-					Role:    "user",
-					Content: input,
-				},
-			},
-			Model:     openai.GPT3Dot5Turbo,
-			MaxTokens: 1000,
-		},
-	)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
-		os.Exit(1)
-	}
+%s
+User: %s
+Chatbot:`
 
-	// Print the response from ChatGPT
-	var generatedText string
-	if len(response.Choices) > 0 {
-		if response.Choices[0].Message.Content != "" {
-			generatedText = response.Choices[0].Message.Content
-		} else {
-			generatedText = response.Choices[0].Message.Content
+	// Initialize the conversation history
+	conversationHistory := ""
+
+	// Start the conversation loop
+	for {
+		// Prompt the user for input
+		fmt.Print("You: ")
+		var userInput string
+		fmt.Scanln(&userInput)
+
+		// If the user types "exit", break out of the conversation loop
+		if userInput == "exit" {
+			break
 		}
+
+		// Call the OpenAI API to generate a response
+		response, err := client.Completions(context.Background(), &openai.CompletionRequest{
+			Prompt:    fmt.Sprintf(prompt, conversationHistory, userInput),
+			MaxTokens: 100,
+			Model:     "davinci",
+		})
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			continue
+		}
+
+		// Extract the response text from the response object
+		var generatedText string
+		if len(response.Choices) > 0 {
+			generatedText = response.Choices[0].Text
+		}
+
+		// Print the response from the chatbot
+		fmt.Printf("Chatbot: %v\n", generatedText)
+
+		// Add the conversation to the conversation history
+		conversationHistory += fmt.Sprintf("You: %s\nChatbot: %s\n", userInput, generatedText)
 	}
-	fmt.Printf("ChatGPT: %v\n", generatedText)
 }
